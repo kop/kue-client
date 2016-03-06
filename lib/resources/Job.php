@@ -20,9 +20,9 @@ use kop\kue\exceptions\ClientException;
 class Job
 {
     /**
-     * @var Client $_client Kue API client instance.
+     * @var Client $client Kue API client instance.
      */
-    private $_client;
+    private $client;
 
     /**
      * Class constructor.
@@ -31,7 +31,7 @@ class Job
      */
     public function __construct(Client $client)
     {
-        $this->_client = $client;
+        $this->client = $client;
     }
 
     /**
@@ -66,7 +66,7 @@ class Job
     {
         // Search by query string
         if (is_string($query)) {
-            return $this->_client->request('GET', 'job/search', [
+            return $this->client->request('GET', 'job/search', [
                 'query' => [
                     'q' => $query,
                 ]
@@ -86,11 +86,11 @@ class Job
             if (in_array('type', $query)) {
                 $requestPath = "/{$query['type']}" . $requestPath;
             }
-            return $this->_client->request('GET', "jobs{$requestPath}");
+            return $this->client->request('GET', "jobs{$requestPath}");
         }
 
-        $this->_client->getLogger()->error('Jobs search request is composed wrong!');
-        if ($this->_client->getThrowExceptions()) {
+        $this->client->getLogger()->error('Jobs search request is composed wrong!');
+        if ($this->client->getThrowExceptions()) {
             throw new ClientException('Jobs search request is composed wrong!');
         }
 
@@ -111,7 +111,7 @@ class Job
      */
     public function create($type, $data, $options = [])
     {
-        return $this->_client->request('POST', 'job', [
+        return $this->client->request('POST', 'job', [
             'json' => [
                 'type' => $type,
                 'data' => $data,
@@ -132,7 +132,7 @@ class Job
      */
     public function get($id)
     {
-        return $this->_client->request('GET', "job/{$id}");
+        return $this->client->request('GET', "job/{$id}");
     }
 
     /**
@@ -147,7 +147,7 @@ class Job
      */
     public function logs($id)
     {
-        return $this->_client->request('GET', "job/{$id}/log");
+        return $this->client->request('GET', "job/{$id}/log");
     }
 
     /**
@@ -162,6 +162,6 @@ class Job
      */
     public function delete($id)
     {
-        return $this->_client->request('DELETE', "job/{$id}");
+        return $this->client->request('DELETE', "job/{$id}");
     }
 }
