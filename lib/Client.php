@@ -23,24 +23,24 @@ use Psr\Log\NullLogger;
 class Client
 {
     /**
-     * @var HttpClient Guzzle HTTP client.
+     * @var HttpClient $httpClient Guzzle HTTP client.
      */
-    private $_httpClient;
+    private $httpClient;
 
     /**
-     * @var LoggerInterface $_logger PSR-3 compatible logger.
+     * @var LoggerInterface $logger PSR-3 compatible logger.
      */
-    private $_logger;
+    private $logger;
 
     /**
-     * @var bool $_throwExceptions Whether to throw exceptions in case of API request errors or just return `false`.
+     * @var bool $throwExceptions Whether to throw exceptions in case of API request errors or just return `false`.
      */
-    private $_throwExceptions;
+    private $throwExceptions;
 
     /**
-     * @var array $_resources Instances of Kue API resources.
+     * @var array $resources Instances of Kue API resources.
      */
-    private $_resources = [];
+    private $resources = [];
 
     /**
      * Class constructor.
@@ -55,7 +55,7 @@ class Client
      */
     public function __construct($apiURI, array $clientOptions = [], LoggerInterface $logger = null, $throwExceptions = false)
     {
-        $this->_httpClient = new HttpClient(array_merge($clientOptions, [
+        $this->httpClient = new HttpClient(array_merge($clientOptions, [
             'base_uri' => $apiURI,
             'headers' => [
                 'Accept' => 'application/json',
@@ -86,11 +86,11 @@ class Client
      */
     public function jobs()
     {
-        if (!isset($this->_resources[Job::class])) {
-            $this->_resources[Job::class] = new Job($this);
+        if (!isset($this->resources[Job::class])) {
+            $this->resources[Job::class] = new Job($this);
         }
 
-        return $this->_resources[Job::class];
+        return $this->resources[Job::class];
     }
 
     /**
@@ -100,7 +100,7 @@ class Client
      */
     public function getHttpClient()
     {
-        return $this->_httpClient;
+        return $this->httpClient;
     }
 
     /**
@@ -108,9 +108,9 @@ class Client
      *
      * @param LoggerInterface|null $logger PSR-3 compatible logger or null to disable logging.
      */
-    public function setLogger(LoggerInterface $logger)
+    public function setLogger(LoggerInterface $logger = null)
     {
-        $this->_logger = $logger;
+        $this->logger = $logger;
     }
 
     /**
@@ -120,11 +120,11 @@ class Client
      */
     public function getLogger()
     {
-        if (!$this->_logger) {
-            $this->_logger = new NullLogger();
+        if (!$this->logger) {
+            $this->logger = new NullLogger();
         }
 
-        return $this->_logger;
+        return $this->logger;
     }
 
     /**
@@ -134,7 +134,7 @@ class Client
      */
     public function setThrowExceptions($enabled = true)
     {
-        $this->_throwExceptions = $enabled;
+        $this->throwExceptions = $enabled;
     }
 
     /**
@@ -144,7 +144,7 @@ class Client
      */
     public function getThrowExceptions()
     {
-        return $this->_throwExceptions;
+        return $this->throwExceptions;
     }
 
     /**
@@ -159,23 +159,27 @@ class Client
      */
     public function request($method, $path, array $options = [])
     {
+        // Make request
         $this->getLogger()->debug("Executing Kue API request: {$method} {$path}", $options);
-        $response = $this->_httpClient->request($method, $path, $options);
+        $response = $this->httpClient->request($method, $path, $options);
+
+        // Success
         if ($response->getStatusCode() === 200) {
             $this->getLogger()->debug('API request successfully completed.', [
                 'response' => $response->getBody(),
             ]);
             return json_decode($response->getBody());
-        } else {
-            $this->getLogger()->error('Kue API error #' . $response->getStatusCode(), [
-                'reason' => $response->getReasonPhrase(),
-                'body' => $response->getBody(),
-            ]);
-            if ($this->getThrowExceptions()) {
-                throw new ApiException($response->getStatusCode(), $response->getBody());
-            } else {
-                return false;
-            }
         }
+
+        // Failure
+        $this->getLogger()->error('Kue API error #' . $response->getStatusCode(), [
+            'reason' => $response->getReasonPhrase(),
+            'body' => $response->getBody(),
+        ]);
+        if ($this->getThrowExceptions()) {
+            throw new ApiException($response->getStatusCode(), $response->getBody());
+        }
+
+        return false;
     }
 }
