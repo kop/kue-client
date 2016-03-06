@@ -6,6 +6,12 @@ PHP client for Kue JSON API
 This package is a PHP client for Kue JSON API.
 It's tested with Kue version `0.10.3` and will be kept in sync with Kue changes on best effort basis.
 
+[![Latest Stable Version](https://img.shields.io/packagist/v/kop/php-kue-client.svg)](https://packagist.org/packages/kop/php-kue-client)
+[![Code Climate](https://img.shields.io/codeclimate/github/kop/php-kue-client.svg)](https://codeclimate.com/github/kop/php-kue-client/trends)
+[![Scrutinizer Code Quality](https://img.shields.io/scrutinizer/g/kop/php-kue-client.svg)](https://scrutinizer-ci.com/g/kop/php-kue-client/)
+[![Gemnasium](https://img.shields.io/gemnasium/kop/php-kue-client.svg)](https://gemnasium.com/kop/php-kue-client)
+[![License](https://img.shields.io/packagist/l/kop/php-kue-client.svg)](https://packagist.org/packages/kop/php-kue-client)
+
 
 Requirements
 ------------
